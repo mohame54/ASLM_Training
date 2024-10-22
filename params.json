@@ -1,0 +1,16 @@
+{
+    "log_dir": "ASLM_Weights",
+    "log_filename": "logs.txt",
+    "hf_repo_name": "ASLM_Weights",
+    "hf_user_name": null,
+    "hf_token_id": "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",
+    "batch_size": 4,
+    "seq_len": 1024,
+    "accum_steps": 1,
+    "num_iters": 170167,
+    "warmup_steps": 250,
+    "val_steps": 250,
+    "save_freq":2000,
+    "model_id":"meta-llama/Llama-3.2-1B",
+    "data_dir":"data"
+}
