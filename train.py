@@ -15,11 +15,15 @@ from torch.nn.parallel import DistributedDataParallel as DDP
 import torch.distributed as dist
 from model import ASLM, make_peft_model
 from data import DataLoaderLite
+import warnings
 
+
+warnings.filterwarnings("ignore")
 
 
 init_process_group(backend='nccl')
 ddp_rank = int(os.environ['RANK'])
+os.environ['TORCH_DISTRIBUTED_DEBUG '] = "DETAIL"
 ddp_local_rank = int(os.environ['LOCAL_RANK'])
 world_size = int(os.environ['WORLD_SIZE'])
 device = f'cuda:{ddp_local_rank}'
