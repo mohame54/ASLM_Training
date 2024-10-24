@@ -50,7 +50,7 @@ SAVE_FREQ = config.save_freq
 
 
 dtype = torch.bfloat16 if check_bfloat16_support(ddp_rank == 0) else torch.float16
-scaler = torch.GradScaler() if check_bfloat16_support(ddp_rank == 0) else None
+scaler = torch.GradScaler() if not check_bfloat16_support(ddp_rank == 0) else None
 
 
 def create_attn_mask(x:torch.Tensor):
