@@ -1,6 +1,7 @@
 import torch
 import time
 import os
+import inspect
 from functools import partial
 from utils import(
     set_training,
@@ -162,7 +163,7 @@ def training_loop(
                 
 def configure_optimizers(model, weight_decay, learning_rate, device_type):
     # start with all of the candidate parameters (that require grad)
-    param_dict = {pn: p for pn, p in self.named_parameters()}
+    param_dict = {pn: p for pn, p in model.named_parameters()}
     param_dict = {pn: p for pn, p in param_dict.items() if p.requires_grad}
     # create optim groups. Any parameters that is 2D will be weight decayed, otherwise no.
     # i.e. all weight tensors in matmuls + embeddings decay, all biases and layernorms don't.
