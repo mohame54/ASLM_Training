@@ -120,7 +120,7 @@ def make_peft_model(
     **kwargs
 ):
     params = dict(
-          r=128,
+          r=64,
           lora_alpha=32,
           target_modules=["q_proj", "k_proj", "v_proj", "o_proj",
                           "gate_proj", "up_proj", "down_proj"],
