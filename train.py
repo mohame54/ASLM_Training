@@ -23,7 +23,7 @@ warnings.filterwarnings("ignore")
 
 init_process_group(backend='nccl')
 ddp_rank = int(os.environ['RANK'])
-os.environ['TORCH_DISTRIBUTED_DEBUG '] = "DETAIL"
+os.environ['TORCH_DISTRIBUTED_DEBUG '] = "INFO"
 ddp_local_rank = int(os.environ['LOCAL_RANK'])
 world_size = int(os.environ['WORLD_SIZE'])
 device = f'cuda:{ddp_local_rank}'
@@ -159,12 +159,40 @@ def training_loop(
             with open(LOG_FILE, "a") as f:
                 f.write(f"{step} train {loss_accum.item():.6f}\n")
 
+                
+def configure_optimizers(model, weight_decay, learning_rate, device_type):
+    # start with all of the candidate parameters (that require grad)
+    param_dict = {pn: p for pn, p in self.named_parameters()}
+    param_dict = {pn: p for pn, p in param_dict.items() if p.requires_grad}
+    # create optim groups. Any parameters that is 2D will be weight decayed, otherwise no.
+    # i.e. all weight tensors in matmuls + embeddings decay, all biases and layernorms don't.
+    decay_params = [p for n, p in param_dict.items() if p.dim() >= 2]
+    nodecay_params = [p for n, p in param_dict.items() if p.dim() < 2]
+    optim_groups = [
+        {'params': decay_params, 'weight_decay': weight_decay},
+        {'params': nodecay_params, 'weight_decay': 0.0}
+    ]
+    num_decay_params = sum(p.numel() for p in decay_params)
+    num_nodecay_params = sum(p.numel() for p in nodecay_params)
+    if ddp_rank == 0:
+        print(f"num decayed parameter tensors: {len(decay_params)}, with {num_decay_params:,} parameters")
+        print(f"num non-decayed parameter tensors: {len(nodecay_params)}, with {num_nodecay_params:,} parameters")
+    # Create AdamW optimizer and use the fused version if it is available
+    fused_available = 'fused' in inspect.signature(torch.optim.AdamW).parameters
+    use_fused = fused_available and device_type == "cuda"
+    if ddp_rank == 0:
+        print(f"using fused AdamW: {use_fused}")
+    optimizer = torch.optim.AdamW(optim_groups, lr=learning_rate, betas=(0.9, 0.95), eps=1e-8, fused=use_fused)
+    return optimizer
+                
+                
+                
 
 model = ASLM(config.model_id, ddp_rank==0)
 model = make_peft_model(model,ddp_rank==0)
 model = model.to(device)
-Opt = torch.optim.AdamW([p  for p in model.parameters() if p.requires_grad], 1e-4)
-model = DDP(model)
+Opt = configure_optimizers(model, 0.1, 6e-4, "cuda")
+model = DDP(model, find_unused_parameters=True)
 
 
 train_loader = DataLoaderLite(
