@@ -90,7 +90,7 @@ def training_loop(
           model.require_backward_grad_sync = (grad_step == accum_steps - 1)  
           with torch.autocast(device_type='cuda', dtype=compute_dtype):
               mask = create_attn_mask(inputs)
-              preds = model(inputs, attention_mask=mask).logits
+              preds = model(inputs, attention_mask=mask)
               loss = cross_entropy_loss(preds, labels)
           
           loss = loss / accum_steps
@@ -130,7 +130,7 @@ def training_loop(
                     x, y = x.to(device), y.to(device)
                     with torch.autocast(device_type="cuda", dtype=compute_dtype):
                         mask = create_attn_mask(x)
-                        logits = model(x, attention_mask=mask).logits
+                        logits = model(x, attention_mask=mask)
                         loss = cross_entropy_loss(logits, y)
 
                     loss = loss / val_loss_steps
