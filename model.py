@@ -103,15 +103,8 @@ class ASLM(nn.Module):
         hidden_states = outputs[0]
 
         logits = self.lm_logits(hidden_states[:, -num_logits_to_keep:, :])
-        return CausalLMOutputWithPast(
-            loss=None,
-            logits=logits,
-            past_key_values=outputs.past_key_values,
-            hidden_states=outputs.hidden_states,
-            attentions=outputs.attentions,
-        )
-
-
+        return logits
+      
 
 def make_peft_model(
     model,
