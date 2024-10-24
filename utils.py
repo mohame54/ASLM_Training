@@ -76,7 +76,7 @@ def hf_permission(hf_tok):
 
 def load_json(file_path, as_holder=False):
     with open(file_path, "r") as f:
-      data = json.loads(f)
+      data = json.load(f)
     if as_holder:
        data = DataHolder(**data)  
     return data  
