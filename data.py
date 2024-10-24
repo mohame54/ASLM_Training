@@ -24,7 +24,7 @@ class DataLoaderLite:
         data_root = data_root
         shards = os.listdir(data_root)
         shards = [s for s in shards if split in s and s.endswith(".npy")]
-        self.lengths_config = load_json(os.path.join(data_root, [s for s in shards if s.endswith(".json")][0]))
+        self.lengths_config = load_json(os.path.join(data_root, [s for s in os.listdir(data_root) if s.endswith(".json")][0]))
         shards = sorted(shards)
         shards = [os.path.join(data_root, s) for s in shards]
         self.shards = shards
