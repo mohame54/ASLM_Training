@@ -34,7 +34,7 @@ class DataLoaderLite:
         self.reset()
 
     def load_tokens(self, file_path):
-        filename = file_path.split("/"[-1])
+        filename = file_path.split("/")[-1]
         npt = np.load(file_path)
         l = self.lengths_config[filename]
         npt = np.ascontiguousarray(npt.astype(np.int32)[:l])
