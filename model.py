@@ -4,6 +4,7 @@ from torch.nn import functional as F
 from typing import Union, Optional, List, Tuple
 from utils import load_pretrained, print_trainable_parameters
 from peft import LoraConfig, get_peft_model
+from transformers.cache_utils import Cache
 
 
 class ASLM(nn.Module):
