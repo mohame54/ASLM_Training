@@ -76,7 +76,7 @@ def training_loop(
 ):
     
     #dev = torch.cuda.device(rank)
-    is_float16 = compute_dtype is torch.float16
+    is_float16 = scaler is not None
     is_master_process = ddp_rank == 0
     for step in range(num_iters):
         loss_accum = 0.0
