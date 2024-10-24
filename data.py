@@ -36,7 +36,7 @@ class DataLoaderLite:
     def load_tokens(self, file_path):
         filename = file_path.split("/"[-1])
         npt = np.load(file_path)
-        l = self.lengths_config(filename)
+        l = self.lengths_config[filename]
         npt = np.ascontiguousarray(npt.astype(np.int32)[:l])
         ptt = torch.tensor(npt, dtype=torch.long)
         return ptt    
