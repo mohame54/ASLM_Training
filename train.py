@@ -149,8 +149,8 @@ def training_loop(
                 f.write(f"{step} train {loss_accum.item():.6f}\n")
 
 
-model = ASLM(config.model_id, ddp_local_rank==True)
-model = make_peft_model(model,logs=ddp_local_rank)
+model = ASLM(config.model_id, ddp_local_rank==0)
+model = make_peft_model(model,ddp_local_rank==0)
 model = model.to(device)
 Opt = torch.optim.AdamW([p  for p in model.parameters() if p.requires_grad], 1e-4)
 model = DDP(model)
