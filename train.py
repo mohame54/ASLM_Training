@@ -74,9 +74,9 @@ def training_loop(
     
 ):
     
-    dev = torch.cuda.device(rank)
+    #dev = torch.cuda.device(rank)
     is_float16 = compute_dtype is torch.float16
-    is_master_process = rank == 0
+    is_master_process = ddp_rank == 0
     for step in range(num_iters):
         loss_accum = 0.0
         t0 = time.time()
@@ -84,8 +84,8 @@ def training_loop(
         opt.zero_grad()
         for grad_step in range(accum_steps):
           inputs, labels = train_iter.next_batch()
-          inputs = inputs.to(dev)
-          labels = labels.to(dev)
+          inputs = inputs.to(device)
+          labels = labels.to(device)
           model.require_backward_grad_sync = (grad_step == accum_steps - 1)  
           with torch.autocast(device_type='cuda', dtype=compute_dtype):
               mask = create_attn_mask(inputs)
@@ -126,7 +126,7 @@ def training_loop(
                 val_loss_accum = 0.0
                 for _ in range(val_loss_steps):
                     x, y = val_iter.next_batch()
-                    x, y = x.to(dev), y.to(dev)
+                    x, y = x.to(device), y.to(device)
                     with torch.autocast(device_type="cuda", dtype=compute_dtype):
                         mask = create_attn_mask(x)
                         logits = model(x, attention_mask=mask).logits
@@ -155,8 +155,8 @@ def training_loop(
                 f.write(f"{step} train {loss_accum.item():.6f}\n")
 
 
-model = ASLM(config.model_id, ddp_local_rank==0)
-model = make_peft_model(model,ddp_local_rank==0)
+model = ASLM(config.model_id, ddp_rank==0)
+model = make_peft_model(model,ddp_rank==0)
 model = model.to(device)
 Opt = torch.optim.AdamW([p  for p in model.parameters() if p.requires_grad], 1e-4)
 model = DDP(model)
@@ -166,7 +166,7 @@ train_loader = DataLoaderLite(
     config.data_dir,
     config.batch_size,
     config.seq_len,
-    ddp_local_rank,
+    ddp_rank,
     world_size,
     split="train"
 )
@@ -175,7 +175,7 @@ val_loader = DataLoaderLite(
     config.data_dir,
     config.batch_size,
     config.seq_len,
-    ddp_local_rank,
+    ddp_rank,
     world_size,
     split="val"
 )
