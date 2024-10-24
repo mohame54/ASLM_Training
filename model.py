@@ -5,6 +5,7 @@ from typing import Union, Optional, List, Tuple
 from utils import load_pretrained, print_trainable_parameters
 from peft import LoraConfig, get_peft_model
 from transformers.cache_utils import Cache
+from transformers.modeling_outputs import CausalLMOutputWithPast
 
 
 class ASLM(nn.Module):
