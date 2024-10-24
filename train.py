@@ -44,9 +44,8 @@ get_lr = partial(
 )
 
 
-CUR_DIR = os.getcwd()
-LOG_DIR = os.path.join(CUR_DIR, config.log_dir)
-LOG_FILE = os.path.join(LOG_DIR, config.log_filename)
+LOG_DIR =  config.log_dir
+LOG_FILE = config.log_filename
 SAVE_FREQ = config.save_freq
 
 
