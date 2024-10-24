@@ -52,6 +52,11 @@ SAVE_FREQ = config.save_freq
 dtype = torch.bfloat16 if check_bfloat16_support(ddp_local_rank == 0) else torch.float16
 
 
+def create_attn_mask(x:torch.Tensor):
+    bs, seq_len = x.size()
+    mask = torch.ones((bs, seq_len), device=x.device, dtype=torch.int32)
+    return mask
+
 
 def training_loop(
     model,
@@ -83,7 +88,8 @@ def training_loop(
           labels = labels.to(dev)
           model.require_backward_grad_sync = (grad_step == accum_steps - 1)  
           with torch.autocast(device_type='cuda', dtype=compute_dtype):
-              preds = model(inputs).logits
+              mask = create_attn_mask(inputs)
+              preds = model(inputs, attention_mask=mask).logits
               loss = cross_entropy_loss(preds, labels)
           
           loss = loss / accum_steps
@@ -122,7 +128,8 @@ def training_loop(
                     x, y = val_iter.next_batch()
                     x, y = x.to(dev), y.to(dev)
                     with torch.autocast(device_type="cuda", dtype=compute_dtype):
-                        logits = model(x).logits
+                        mask = create_attn_mask(x)
+                        logits = model(x, attention_mask=mask).logits
                         loss = cross_entropy_loss(logits, y)
 
                     loss = loss / val_loss_steps
