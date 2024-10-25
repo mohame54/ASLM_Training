@@ -12,5 +12,6 @@
     "val_steps": 250,
     "save_freq":2000,
     "model_id":"meta-llama/Llama-3.2-1B",
-    "data_dir":"data"
+    "data_dir":"data",
+    "peft_kwargs":{"r":128}
 }
