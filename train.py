@@ -191,7 +191,7 @@ def configure_optimizers(model, weight_decay, learning_rate, device_type):
                 
 
 model = ASLM(config.model_id, ddp_rank==0)
-model = make_peft_model(model,ddp_rank==0)
+model = make_peft_model(model,ddp_rank==0, **config.peft_kwargs)
 model = model.to(device)
 Opt = bnb.optim.AdamW8bit([p for p in model.parameters() if p.requirs_grad], 1e-4,weight_decay =0.1)#configure_optimizers(model, 0.1, 6e-4, "cuda")
 model = DDP(model, find_unused_parameters=True)
